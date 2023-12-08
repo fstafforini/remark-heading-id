@@ -6,9 +6,8 @@
 const visit = require('unist-util-visit')
 const { setNodeId, getDefaultId } = require('./util')
 
-module.exports = function(options = { defaults: false, uniqueDefaults: true }) {
+module.exports = function(options = { defaults: false, uniqueDefaults: true, defaultPrefix: null }) {
   return function(node) {
-
     const uniqueDefaultIdsCounters = {}
 
     visit(node, 'heading', node => {
@@ -31,18 +30,21 @@ module.exports = function(options = { defaults: false, uniqueDefaults: true }) {
 
       if (options.defaults) {
         // If no custom id was found, use default instead
-        let defaultIdCandidate = getDefaultId(node.children);
+        let defaultIdCandidate = getDefaultId(node.children)
+        if (options.defaultPrefix !== null) {
+          defaultIdCandidate = options.defaultPrefix + '-' + defaultIdCandidate
+        }
         if (options.uniqueDefaults) {
           if (uniqueDefaultIdsCounters[defaultIdCandidate] === undefined) {
             // First time this default id is used: initialize counter
-            uniqueDefaultIdsCounters[defaultIdCandidate] = 0;
+            uniqueDefaultIdsCounters[defaultIdCandidate] = 0
           } else {
             // Id already used: increment counter and append it to defaultIdCandidate
-            uniqueDefaultIdsCounters[defaultIdCandidate]++;
-            defaultIdCandidate += "-" + uniqueDefaultIdsCounters[defaultIdCandidate];
+            uniqueDefaultIdsCounters[defaultIdCandidate]++
+            defaultIdCandidate += '-' + uniqueDefaultIdsCounters[defaultIdCandidate]
           }
         }
-        setNodeId(node, defaultIdCandidate);
+        setNodeId(node, defaultIdCandidate)
       }
     })
   }

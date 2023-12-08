@@ -71,6 +71,52 @@ describe('remarkHeadingId', function() {
 `)
   })
 
+  it('defaults with uniqueDefaults should generate distinct ids', function() {
+    let { contents } = remark()
+      .data('settings', {
+        position: false
+      })
+      .use(remarkHeadingId, { defaults: true, uniqueDefaults: true })
+      .use(stringify)
+      .use(html).processSync(` ## heading
+### introduction
+### argument
+## heading
+### introduction
+### argument`)
+    expect(contents).toMatchInlineSnapshot(`
+"<h2 id=\\"heading\\">heading</h2>
+<h3 id=\\"introduction\\">introduction</h3>
+<h3 id=\\"argument\\">argument</h3>
+<h2 id=\\"heading-1\\">heading</h2>
+<h3 id=\\"introduction-1\\">introduction</h3>
+<h3 id=\\"argument-1\\">argument</h3>"
+`)
+  })
+
+  it('defaults with uniqueDefaults and defaultPrefix should generate distinct ids, prefixed by defaultPrefix', function() {
+    let { contents } = remark()
+      .data('settings', {
+        position: false
+      })
+      .use(remarkHeadingId, { defaults: true, uniqueDefaults: true, defaultPrefix: 'somePrefix' })
+      .use(stringify)
+      .use(html).processSync(` ## heading
+### introduction
+### argument
+## heading
+### introduction
+### argument`)
+    expect(contents).toMatchInlineSnapshot(`
+"<h2 id=\\"somePrefix-heading\\">heading</h2>
+<h3 id=\\"somePrefix-introduction\\">introduction</h3>
+<h3 id=\\"somePrefix-argument\\">argument</h3>
+<h2 id=\\"somePrefix-heading-1\\">heading</h2>
+<h3 id=\\"somePrefix-introduction-1\\">introduction</h3>
+<h3 id=\\"somePrefix-argument-1\\">argument</h3>"
+`)
+  })
+
   it('should parse well which contains inline syntax', function() {
     let { contents } = remark()
       .data('settings', {
